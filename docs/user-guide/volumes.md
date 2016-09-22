@@ -77,6 +77,7 @@ Kubernetes supports several types of Volumes:
    * `downwardAPI`
    * `azureFileVolume`
    * `vsphereVolume`
+   * `cinderLocal`
 
 We welcome additional contributions.
 
@@ -482,6 +483,63 @@ spec:
       volumePath: myDisk
       fsType: ext4
 ```
+
+### cinderLocal
+
+A `cinderLocal` volume is used to attach a block device managed by OpenStack Cinder service.
+Unlike `cinder` volume which uses the Nova service for disk attachment, `cinderLocal` performs the attachment locally by the kubelet itself.
+Since `cinderLocal` does not use Kubernetes Cloud Provider services, API information such as identity service endpoint and credentials must be supplied via a secret.
+
+#### cinderLocal Secret Example
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cinder-auth
+type: Opaque
+data:
+  authURL: CaHR0cDovL2NvbnRyb2xsZXI6MzUzNTcvdjM=
+  username: YWRtaW4=
+  password: c3RhY2s=
+  project: YWRtaW4=
+  domain: ZGVmYXVsdA==
+```
+
+The following `data` items are base64 encoded values:
+
+* `authURL`: URL of the Keystone v3 API endpoint
+* `username`: Username of the Keystone user
+* `password`: Password associated with `username`
+* `project`: Project (tenant) to use
+* `domain`: Domain which contains the project and user
+
+#### cinderLocal Example Configuration
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+spec:
+  containers:
+  - image: gcr.io/google_containers/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /test-cinder-local
+      name: test-volume
+  volumes:
+  - name: test-volume
+    cinderLocal:
+      # Cinder Volume ID
+      volumeID: 35391d6a-3e31-4962-8dad-02c5f0725de6
+      fsType: ext4
+      # namespace/name of secret
+      secretRef: default/cinder-auth
+```
+
+`secretRef` names the secret that contains Cinder `authURL` and credentials.
+It has the format of `namespace/name` or just `name` in which case the namespace is assumed to be `default`.
 
 ## Resources
 

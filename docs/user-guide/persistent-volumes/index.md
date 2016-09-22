@@ -49,7 +49,7 @@ When a user is done with their volume, they can delete the PVC objects from the 
 
 ### Reclaiming
 
-The reclaim policy for a `PersistentVolume` tells the cluster what to do with the volume after it has been released of its claim.  Currently, volumes can either be Retained, Recycled or Deleted.  Retention allows for manual reclamation of the resource.  For those volume plugins that support it, deletion removes both the `PersistentVolume` object from Kubernetes as well as deletes associated storage asset in external infrastructure such as AWS EBS, GCE PD or Cinder volume. If supported by appropriate volume plugin, recycling performs a basic scrub (`rm -rf /thevolume/*`) on the volume and makes it available again for a new claim.
+The reclaim policy for a `PersistentVolume` tells the cluster what to do with the volume after it has been released of its claim.  Currently, volumes can either be Retained, Recycled or Deleted.  Retention allows for manual reclamation of the resource.  For those volume plugins that support it, deletion removes both the `PersistentVolume` object from Kubernetes as well as deletes associated storage asset in external infrastructure such as AWS EBS, GCE PD, Cinder, or Cinder Local volume. If supported by appropriate volume plugin, recycling performs a basic scrub (`rm -rf /thevolume/*`) on the volume and makes it available again for a new claim.
 
 ## Types of Persistent Volumes
 
@@ -64,6 +64,7 @@ The reclaim policy for a `PersistentVolume` tells the cluster what to do with th
 * RBD (Ceph Block Device)
 * CephFS
 * Cinder (OpenStack block storage)
+* Cinder Local (OpenStack block storage without cloud provider)
 * Glusterfs
 * VsphereVolume
 * HostPath (single node testing only -- local storage is not supported in any way and WILL NOT WORK in a multi-node cluster)
@@ -120,6 +121,7 @@ In the CLI, the access modes are abbreviated to:
 | AzureFile            | x            | x           | x            |
 | CephFS               | x            | x           | x            |
 | Cinder               | x            | -           | -            |
+| CinderLocal          | x            | -           | -            |
 | FC                   | x            | x           | -            |
 | FlexVolume           | x            | x           | -            |
 | GCEPersistentDisk    | x            | x           | -            |
@@ -137,7 +139,7 @@ Current recycling policies are:
 
 * Retain -- manual reclamation
 * Recycle -- basic scrub ("rm -rf /thevolume/*")
-* Delete -- associated storage asset such as AWS EBS, GCE PD or OpenStack Cinder volume is deleted
+* Delete -- associated storage asset such as AWS EBS, GCE PD, OpenStack Cinder, or Cinder Local volume is deleted
 
 Currently, only NFS and HostPath support recycling. AWS EBS, GCE PD and Cinder volumes support deletion.
 
